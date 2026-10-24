@@ -5,6 +5,15 @@ use App\Domain\Identity\Exceptions\CompteInactifException;
 use App\Domain\Identity\Exceptions\EmailDejaUtiliseException;
 use App\Domain\Identity\Exceptions\IdentifiantsInvalidesException;
 use App\Domain\Identity\Exceptions\UtilisateurIntrouvableException;
+use App\Domain\Referentiel\Exceptions\ConflitException;
+use App\Domain\Referentiel\Exceptions\DonneesInvalidesException;
+use App\Domain\Referentiel\Exceptions\RessourceIntrouvableException;
+use App\Domain\Referentiel\Exceptions\RessourceUtiliseeException;
+use App\Domain\Scolarite\Exceptions\AnneeNonCouranteException;
+use App\Domain\Scolarite\Exceptions\CapaciteGroupeDepasseeException;
+use App\Domain\Scolarite\Exceptions\EtudiantDejaDansUnGroupeException;
+use App\Domain\Scolarite\Exceptions\FiliereIncompatibleException;
+use App\Domain\Scolarite\Exceptions\InscriptionDejaExistanteException;
 use App\Http\Middleware\RoleMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -48,6 +57,14 @@ return Application::configure(basePath: dirname(__DIR__))
             return null;
         });
 
+        $exceptions->render(function (\App\Domain\Scolarite\Exceptions\AccesRefuseException $exception, Request $request): mixed {
+            if ($request->is('api/*')) {
+                return response()->json(['message' => $exception->getMessage()], 403);
+            }
+
+            return null;
+        });
+
         $exceptions->render(function (EmailDejaUtiliseException $exception, Request $request): mixed {
             if ($request->is('api/*')) {
                 return response()->json(['message' => $exception->getMessage()], 409);
@@ -59,6 +76,78 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (UtilisateurIntrouvableException $exception, Request $request): mixed {
             if ($request->is('api/*')) {
                 return response()->json(['message' => $exception->getMessage()], 404);
+            }
+
+            return null;
+        });
+
+        $exceptions->render(function (RessourceIntrouvableException $exception, Request $request): mixed {
+            if ($request->is('api/*')) {
+                return response()->json(['message' => $exception->getMessage()], 404);
+            }
+
+            return null;
+        });
+
+        $exceptions->render(function (ConflitException $exception, Request $request): mixed {
+            if ($request->is('api/*')) {
+                return response()->json(['message' => $exception->getMessage()], 409);
+            }
+
+            return null;
+        });
+
+        $exceptions->render(function (RessourceUtiliseeException $exception, Request $request): mixed {
+            if ($request->is('api/*')) {
+                return response()->json(['message' => 'Suppression impossible : des données en dépendent'], 409);
+            }
+
+            return null;
+        });
+
+        $exceptions->render(function (DonneesInvalidesException $exception, Request $request): mixed {
+            if ($request->is('api/*')) {
+                return response()->json(['message' => $exception->getMessage()], 422);
+            }
+
+            return null;
+        });
+
+        $exceptions->render(function (FiliereIncompatibleException $exception, Request $request): mixed {
+            if ($request->is('api/*')) {
+                return response()->json(['message' => $exception->getMessage()], 422);
+            }
+
+            return null;
+        });
+
+        $exceptions->render(function (CapaciteGroupeDepasseeException $exception, Request $request): mixed {
+            if ($request->is('api/*')) {
+                return response()->json(['message' => $exception->getMessage()], 422);
+            }
+
+            return null;
+        });
+
+        $exceptions->render(function (EtudiantDejaDansUnGroupeException $exception, Request $request): mixed {
+            if ($request->is('api/*')) {
+                return response()->json(['message' => $exception->getMessage()], 409);
+            }
+
+            return null;
+        });
+
+        $exceptions->render(function (InscriptionDejaExistanteException $exception, Request $request): mixed {
+            if ($request->is('api/*')) {
+                return response()->json(['message' => $exception->getMessage()], 409);
+            }
+
+            return null;
+        });
+
+        $exceptions->render(function (AnneeNonCouranteException $exception, Request $request): mixed {
+            if ($request->is('api/*')) {
+                return response()->json(['message' => $exception->getMessage()], 422);
             }
 
             return null;

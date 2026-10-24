@@ -37,7 +37,7 @@ final class AuthController extends Controller
         $utilisateur = $request->user('sanctum');
 
         if ($utilisateur !== null) {
-            $utilisateur->currentAccessToken()?->delete();
+            $utilisateur->tokens()->delete();
         }
 
         return response()->json([

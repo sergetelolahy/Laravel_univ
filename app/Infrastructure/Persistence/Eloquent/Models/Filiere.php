@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Infrastructure\Persistence\Eloquent\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Filiere extends Model
 {
@@ -12,5 +13,18 @@ class Filiere extends Model
 
     public $timestamps = false;
 
-    protected $guarded = [];
+    protected $fillable = [
+        'code',
+        'nom',
+    ];
+
+    public function semestres(): HasMany
+    {
+        return $this->hasMany(Semestre::class, 'filiere_id');
+    }
+
+    public function etudiants(): HasMany
+    {
+        return $this->hasMany(Etudiant::class, 'filiere_id');
+    }
 }
