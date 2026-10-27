@@ -11,7 +11,7 @@ class ValidationSemestreController extends Controller
 {
     public function store(Request $request, int $semestre, CalculMoyennesService $calcul)
     {
-        $role = strtolower((string) ($request->user()->role ?? ''));
+        $role = strtolower($request->user()->role?->value ?? '');
 
         abort_unless(in_array($role, ['admin', 'administrateur', 'scolarite', 'scolarité'], true),
             403, 'Seuls l’administrateur ou la scolarité peuvent valider un semestre.');

@@ -1,0 +1,80 @@
+import { ADMIN, SCOLARITE, ENSEIGNANT, ETUDIANT } from './roles';
+
+const ITEMS = {
+    dashboard: { to: '/dashboard', label: 'Tableau de bord', end: true },
+    filieres: { to: '/filieres', label: 'Filières' },
+    annees: { to: '/annees', label: 'Années universitaires' },
+    semestres: { to: '/semestres', label: 'Semestres' },
+    cours: { to: '/cours', label: 'Cours' },
+    salles: { to: '/salles', label: 'Salles' },
+    seances: { to: '/seances', label: 'Emplois du temps' },
+    groupes: { to: '/groupes', label: 'Groupes' },
+    etudiants: { to: '/etudiants', label: 'Étudiants' },
+    enseignants: { to: '/enseignants', label: 'Enseignants' },
+    utilisateurs: { to: '/utilisateurs', label: 'Comptes utilisateurs' },
+    inscriptions: { to: '/inscriptions', label: 'Inscriptions' },
+    evaluations: { to: '/evaluations', label: 'Évaluations & notes' },
+    absences: { to: '/absences', label: 'Absences' },
+    validationSemestre: { to: '/validation-semestre', label: 'Validation de semestre' },
+    monEmploiEnseignant: { to: '/mon-espace/emploi-du-temps', label: 'Mon emploi du temps' },
+    mesNotes: { to: '/mon-espace/notes', label: 'Mes notes' },
+    mesMoyennes: { to: '/mon-espace/moyennes', label: 'Mes moyennes' },
+    monEmploiEtudiant: { to: '/mon-espace/emploi-du-temps', label: 'Mon emploi du temps' },
+    mesInscriptions: { to: '/mon-espace/inscriptions', label: 'Mes inscriptions' },
+    monProfil: { to: '/mon-espace/profil', label: 'Mon profil' },
+};
+
+const NAV_BY_ROLE = {
+    [ADMIN]: [
+        ITEMS.dashboard,
+        ITEMS.filieres,
+        ITEMS.annees,
+        ITEMS.semestres,
+        ITEMS.cours,
+        ITEMS.salles,
+        ITEMS.seances,
+        ITEMS.groupes,
+        ITEMS.etudiants,
+        ITEMS.enseignants,
+        ITEMS.inscriptions,
+        ITEMS.evaluations,
+        ITEMS.validationSemestre,
+        ITEMS.utilisateurs,
+    ],
+    [SCOLARITE]: [
+        ITEMS.dashboard,
+        ITEMS.filieres,
+        ITEMS.annees,
+        ITEMS.semestres,
+        ITEMS.cours,
+        ITEMS.salles,
+        ITEMS.groupes,
+        ITEMS.etudiants,
+        ITEMS.enseignants,
+        ITEMS.inscriptions,
+        ITEMS.evaluations,
+        ITEMS.absences,
+        ITEMS.validationSemestre,
+        ITEMS.utilisateurs,
+    ],
+    [ENSEIGNANT]: [
+        ITEMS.dashboard,
+        ITEMS.monEmploiEnseignant,
+        ITEMS.cours,
+        ITEMS.groupes,
+        ITEMS.evaluations,
+        ITEMS.absences,
+    ],
+    [ETUDIANT]: [
+        ITEMS.dashboard,
+        ITEMS.mesNotes,
+        ITEMS.mesMoyennes,
+        ITEMS.monEmploiEtudiant,
+        ITEMS.mesInscriptions,
+        ITEMS.monProfil,
+    ],
+};
+
+export function navItemsForRole(role) {
+    return NAV_BY_ROLE[role] ?? [ITEMS.dashboard];
+}

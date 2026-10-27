@@ -64,6 +64,7 @@ final class CreerUtilisateur
                 'nom' => (string) $donnees['nom'],
                 'prenom' => (string) $donnees['prenom'],
                 'filiere_id' => isset($donnees['filiere_id']) ? (int) $donnees['filiere_id'] : null,
+                'date_naissance' => isset($donnees['date_naissance']) ? (string) $donnees['date_naissance'] : null,
             ];
         }
 

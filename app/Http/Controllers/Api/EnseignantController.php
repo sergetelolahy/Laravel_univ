@@ -18,7 +18,7 @@ final class EnseignantController extends Controller
             ->join('enseignant', 'enseignant.utilisateur_id', '=', 'utilisateur.id')
             ->where('utilisateur.role', Role::ENSEIGNANT->value)
             ->select([
-                'utilisateur.id as id',
+                'enseignant.id as id',
                 'enseignant.nom as nom',
                 'enseignant.prenom as prenom',
                 'enseignant.specialite as specialite',

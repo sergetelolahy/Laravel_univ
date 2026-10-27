@@ -18,7 +18,7 @@ final class UpdateAnneeUniversitaireRequest extends FormRequest
         return [
             'libelle' => ['sometimes', 'required', 'string', 'max:20'],
             'date_debut' => ['sometimes', 'required', 'date_format:Y-m-d'],
-            'date_fin' => ['sometimes', 'required', 'date_format:Y-m-d', 'after_or_equal:date_debut'],
+            'date_fin' => ['sometimes', 'required', 'date_format:Y-m-d', 'after:date_debut'],
             'courante' => ['sometimes', 'boolean'],
         ];
     }
@@ -29,7 +29,7 @@ final class UpdateAnneeUniversitaireRequest extends FormRequest
             'libelle.required' => 'Le libellé est obligatoire.',
             'date_debut.required' => 'La date de début est obligatoire.',
             'date_fin.required' => 'La date de fin est obligatoire.',
-            'date_fin.after_or_equal' => 'La date de fin doit être postérieure ou égale à la date de début.',
+            'date_fin.after' => 'La date de fin doit être strictement postérieure à la date de début.',
         ];
     }
 }

@@ -222,9 +222,9 @@ class EtudiantConsultationController extends Controller
                 ->whereIn('s.groupe_id', $groupeIds)
                 ->select([
                     's.id as seance_id',
-                    's.date_seance',
-                    's.heure_debut',
-                    's.heure_fin',
+                    DB::raw('DATE(s.debut) as date_seance'),
+                    DB::raw('TIME(s.debut) as heure_debut'),
+                    DB::raw('TIME(s.fin) as heure_fin'),
                     'c.id as cours_id',
                     'c.code as code_cours',
                     'c.intitule as cours',
@@ -233,8 +233,7 @@ class EtudiantConsultationController extends Controller
                     'sa.id as salle_id',
                     'sa.nom as salle',
                 ])
-                ->orderBy('s.date_seance')
-                ->orderBy('s.heure_debut')
+                ->orderBy('s.debut')
                 ->get();
         }
 

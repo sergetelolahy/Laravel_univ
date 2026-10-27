@@ -7,8 +7,33 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Vue des moyennes pondérées par étudiant et par cours.
-       
+        // Vue des moyennes pondérées par étudiant et par cours (moyenne des notes
+        // d'un cours, pondérées par le poids de chaque évaluation).
+        DB::statement(<<<'SQL'
+            CREATE OR REPLACE VIEW v_moyenne_cours AS
+            SELECT
+                n.etudiant_id,
+                ev.cours_id,
+                c.semestre_id,
+                ev.annee_id,
+                ROUND(
+                    SUM(n.valeur * ev.ponderation)
+                    / NULLIF(SUM(ev.ponderation), 0),
+                    2
+                ) AS moyenne
+            FROM note AS n
+            INNER JOIN evaluation AS ev
+                ON ev.id = n.evaluation_id
+            INNER JOIN cours AS c
+                ON c.id = ev.cours_id
+            GROUP BY
+                n.etudiant_id,
+                ev.cours_id,
+                c.semestre_id,
+                ev.annee_id
+        SQL);
+
+        // Vue des moyennes pondérées par étudiant et par semestre.
         DB::statement(<<<'SQL'
             CREATE OR REPLACE VIEW v_moyenne_semestre AS
             SELECT

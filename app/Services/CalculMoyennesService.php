@@ -13,19 +13,10 @@ class CalculMoyennesService
      */
     public function moyenneSemestre(int $etudiantId, int $semestreId, int $anneeId): ?float
     {
-        $resultat = DB::table('evaluation as ev')
-            ->join('cours as c', 'c.id', '=', 'ev.cours_id')
-            ->join('note as n', 'n.evaluation_id', '=', 'ev.id')
-            ->where('n.etudiant_id', $etudiantId)
-            ->where('c.semestre_id', $semestreId)
-            ->whereExists(function ($query) use ($etudiantId, $anneeId) {
-                $query->selectRaw('1')
-                    ->from('inscription_cours as ic')
-                    ->whereColumn('ic.cours_id', 'c.id')
-                    ->where('ic.etudiant_id', $etudiantId)
-                    ->where('ic.annee_id', $anneeId);
-            })
-            ->selectRaw('SUM(n.valeur * ev.poids) / NULLIF(SUM(ev.poids), 0) AS moyenne')
+        $resultat = DB::table('v_moyenne_semestre')
+            ->where('etudiant_id', $etudiantId)
+            ->where('semestre_id', $semestreId)
+            ->where('annee_id', $anneeId)
             ->value('moyenne');
 
         return $resultat === null ? null : round((float) $resultat, 2);
@@ -53,6 +44,7 @@ class CalculMoyennesService
                 'moyenne' => $moyenne,
                 'valide' => $valide,
                 'valide_le' => $valide ? now() : null,
+                'verrouille' => true,
                 'updated_at' => now(),
                 'created_at' => now(),
             ]

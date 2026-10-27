@@ -111,6 +111,14 @@ Route::middleware(['auth:sanctum'])->group(function (): void {
         Route::get('/', 'index')->middleware('role:ADMIN,SCOLARITE');
     });
 
+    Route::controller(SeanceController::class)->prefix('seances')->group(function (): void {
+        Route::get('/', 'index')->middleware('role:ADMIN,SCOLARITE');
+        Route::get('/{id}', 'show')->whereNumber('id')->middleware('role:ADMIN,SCOLARITE');
+        Route::post('/', 'store')->middleware('role:ADMIN');
+        Route::put('/{id}', 'update')->whereNumber('id')->middleware('role:ADMIN');
+        Route::delete('/{id}', 'destroy')->whereNumber('id')->middleware('role:ADMIN');
+    });
+
     Route::controller(SalleController::class)->prefix('salles')->group(function (): void {
         Route::get('/', 'index')
             ->middleware('role:ADMIN,SCOLARITE,ENSEIGNANT');

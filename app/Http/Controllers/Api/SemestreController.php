@@ -28,7 +28,9 @@ final class SemestreController extends Controller
 
     public function index(): JsonResponse
     {
-        $result = $this->listerSemestres->execute(request()->query->all(), 1, 15);
+        $page = max(1, (int) request()->query('page', 1));
+        $perPage = min(100, max(1, (int) request()->query('per_page', 15)));
+        $result = $this->listerSemestres->execute(request()->query->all(), $page, $perPage);
 
         return response()->json([
             'data' => SemestreResource::collection(collect($result)),

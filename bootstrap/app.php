@@ -5,6 +5,7 @@ use App\Domain\Identity\Exceptions\CompteInactifException;
 use App\Domain\Identity\Exceptions\EmailDejaUtiliseException;
 use App\Domain\Identity\Exceptions\IdentifiantsInvalidesException;
 use App\Domain\Identity\Exceptions\UtilisateurIntrouvableException;
+use App\Domain\Planning\Exceptions\PlanningException;
 use App\Domain\Referentiel\Exceptions\ConflitException;
 use App\Domain\Referentiel\Exceptions\DonneesInvalidesException;
 use App\Domain\Referentiel\Exceptions\RessourceIntrouvableException;
@@ -148,6 +149,14 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (AnneeNonCouranteException $exception, Request $request): mixed {
             if ($request->is('api/*')) {
                 return response()->json(['message' => $exception->getMessage()], 422);
+            }
+
+            return null;
+        });
+
+        $exceptions->render(function (PlanningException $exception, Request $request): mixed {
+            if ($request->is('api/*')) {
+                return response()->json(['message' => $exception->getMessage()], $exception->statutHttp());
             }
 
             return null;

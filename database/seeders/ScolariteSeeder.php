@@ -84,7 +84,9 @@ class ScolariteSeeder extends Seeder
 
         $etudiants = [];
         for ($i = 1; $i <= 10; $i++) {
-            $pad = str_pad((string) $i, 4, '0', STR_PAD_LEFT);
+            // Décalage de +1000 pour ne pas entrer en collision avec le matricule
+            // ET0001 déjà attribué au compte de démonstration par UtilisateurSeeder.
+            $pad = str_pad((string) ($i + 1000), 4, '0', STR_PAD_LEFT);
             $email = "etudiant{$i}@univ.test";
             $matricule = "ET{$pad}";
 
