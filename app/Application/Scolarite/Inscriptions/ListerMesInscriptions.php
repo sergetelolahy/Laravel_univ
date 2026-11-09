@@ -13,11 +13,10 @@ final class ListerMesInscriptions
     public function __construct(
         private readonly EtudiantRepository $etudiantRepository,
         private readonly InscriptionRepository $inscriptionRepository,
-    ) {
-    }
+    ) {}
 
     /**
-     * @return array<int, array{id:int, etudiant_id:int, cours_id:int, annee_id:int, date_inscription:string}>
+     * @return array<int, array{id:int, etudiant_id:int, cours_id:int, cours:?array{id:int, code:string, intitule:string, semestre_id:?int}, annee_id:int, date_inscription:string}>
      */
     public function execute(int $utilisateurId): array
     {
@@ -33,6 +32,7 @@ final class ListerMesInscriptions
                 'id' => $inscription->id,
                 'etudiant_id' => $inscription->etudiantId,
                 'cours_id' => $inscription->coursId,
+                'cours' => $inscription->resumeCours(),
                 'annee_id' => $inscription->anneeId,
                 'date_inscription' => $inscription->dateInscription,
             ];

@@ -10,7 +10,10 @@ import { Alert, Button, Card, DataTable, Field, PageHeader, Select } from '../..
 export default function MesInscriptionsPage() {
     const { data: meData } = useEtudiantMe();
     const { data, isLoading, error, refetch } = useMesInscriptions();
-    const { data: coursData } = useCoursList();
+    const { data: coursData } = useCoursList(
+        { filiere_id: meData?.data?.filiere_id, per_page: 100 },
+        { enabled: Boolean(meData?.data?.filiere_id) }
+    );
     const { data: anneeCouranteData } = useAnneeCourante();
     const createMutation = useCreateInscription();
 
@@ -23,8 +26,18 @@ export default function MesInscriptionsPage() {
     const coursListe = coursData?.data ?? [];
     const anneeCourante = anneeCouranteData?.data;
 
-    const coursDejaInscrits = new Set(inscriptions.map((i) => i.cours_id));
+    const coursDejaInscrits = new Set(
+        inscriptions
+            .filter((inscription) => inscription.annee_id === anneeCourante?.id)
+            .map((inscription) => inscription.cours_id)
+    );
     const coursDisponibles = coursListe.filter((c) => !coursDejaInscrits.has(c.id));
+    const coursParSemestre = coursDisponibles.reduce((groupes, cours) => {
+        const semestre = cours.semestre?.numero ?? 'Non défini';
+        groupes[semestre] ??= [];
+        groupes[semestre].push(cours);
+        return groupes;
+    }, {});
 
     async function handleSubmit(event) {
         event.preventDefault();
@@ -47,24 +60,37 @@ export default function MesInscriptionsPage() {
 
     return (
         <div>
-            <PageHeader title="Mes inscriptions" description="Mes inscriptions aux cours et auto-inscription." />
+            <PageHeader
+                title="Mes inscriptions"
+                description="Retrouve les cours de ta filière, organisés par semestre, et inscris-toi aux enseignements disponibles."
+            />
 
-            <Card title="M'inscrire à un cours" className="mb-6 max-w-lg">
+            <Card title="Ajouter un cours" className="mb-6">
                 {!anneeCourante && <Alert variant="warning">Aucune année universitaire courante n'est définie actuellement.</Alert>}
-                <form onSubmit={handleSubmit} className="flex items-end gap-3">
+                {moi && !moi.filiere_id && <Alert variant="error">Aucune filière n'est affectée à ton dossier. Contacte la scolarité avant de t'inscrire à un cours.</Alert>}
+                {moi?.filiere && (
+                    <p className="mb-4 text-sm text-slate-600">
+                        Filière : <span className="font-semibold text-slate-900">{moi.filiere.code} — {moi.filiere.nom}</span>
+                    </p>
+                )}
+                <form onSubmit={handleSubmit} className="flex flex-col gap-3 sm:flex-row sm:items-end">
                     <div className="flex-1">
                         <Field label="Cours">
-                            <Select value={coursId} onChange={(e) => setCoursId(e.target.value)} disabled={!anneeCourante}>
+                            <Select value={coursId} onChange={(e) => setCoursId(e.target.value)} disabled={!anneeCourante || !moi?.filiere_id}>
                                 <option value="">Sélectionner un cours…</option>
-                                {coursDisponibles.map((c) => (
-                                    <option key={c.id} value={c.id}>
-                                        {c.code} — {c.intitule}
-                                    </option>
+                                {Object.entries(coursParSemestre).map(([semestre, coursDuSemestre]) => (
+                                    <optgroup key={semestre} label={`Semestre ${semestre}`}>
+                                        {coursDuSemestre.map((c) => (
+                                            <option key={c.id} value={c.id}>
+                                                {c.code} — {c.intitule}
+                                            </option>
+                                        ))}
+                                    </optgroup>
                                 ))}
                             </Select>
                         </Field>
                     </div>
-                    <Button type="submit" loading={createMutation.isPending} disabled={!coursId || !anneeCourante}>
+                    <Button type="submit" className="w-full sm:w-auto" loading={createMutation.isPending} disabled={!coursId || !anneeCourante || !moi?.filiere_id}>
                         S'inscrire
                     </Button>
                 </form>
@@ -72,7 +98,7 @@ export default function MesInscriptionsPage() {
                 {formError && <Alert variant="error" className="mt-3">{formError}</Alert>}
             </Card>
 
-            <Card title="Mes inscriptions actuelles">
+            <Card title="Cours suivis" actions={<span className="text-xs font-medium text-slate-500">{inscriptions.length} inscription{inscriptions.length > 1 ? 's' : ''}</span>}>
                 <DataTable
                     loading={isLoading}
                     error={error ? extractErrorMessage(error) : null}
@@ -82,8 +108,11 @@ export default function MesInscriptionsPage() {
                         {
                             key: 'cours',
                             header: 'Cours',
-                            render: (r) => coursListe.find((c) => c.id === r.cours_id)?.code ?? `#${r.cours_id}`,
+                            render: (r) => r.cours
+                                ? `${r.cours.code} — ${r.cours.intitule}`
+                                : 'Cours indisponible',
                         },
+                        { key: 'semestre', header: 'Semestre', render: (r) => coursListe.find((c) => c.id === r.cours_id)?.semestre?.numero ?? '—' },
                         { key: 'date_inscription', header: "Date d'inscription", render: (r) => formatDateTime(r.date_inscription) },
                     ]}
                 />

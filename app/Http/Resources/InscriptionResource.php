@@ -12,6 +12,10 @@ final class InscriptionResource extends JsonResource
 {
     public function toArray($request): array
     {
+        if (is_array($this->resource)) {
+            return $this->resource;
+        }
+
         /** @var Inscription $inscription */
         $inscription = $this->resource;
 

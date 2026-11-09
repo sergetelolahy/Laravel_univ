@@ -16,6 +16,7 @@ class Filiere extends Model
     protected $fillable = [
         'code',
         'nom',
+        'actif',
     ];
 
     public function semestres(): HasMany

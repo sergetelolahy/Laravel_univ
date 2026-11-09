@@ -14,8 +14,7 @@ final class ListerInscritsDuCours
     public function __construct(
         private readonly InscriptionRepository $inscriptionRepository,
         private readonly EnseignementRepository $enseignementRepository,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array<int, array{id:int, etudiant_id:int, cours_id:int, annee_id:int, date_inscription:string}>
@@ -33,6 +32,11 @@ final class ListerInscritsDuCours
                 $result[] = [
                     'id' => $inscription->id,
                     'etudiant_id' => $inscription->etudiantId,
+                    'etudiant' => [
+                        'matricule' => $inscription->etudiantMatricule,
+                        'nom' => $inscription->etudiantNom,
+                        'prenom' => $inscription->etudiantPrenom,
+                    ],
                     'cours_id' => $inscription->coursId,
                     'annee_id' => $inscription->anneeId,
                     'date_inscription' => $inscription->dateInscription,
@@ -44,7 +48,7 @@ final class ListerInscritsDuCours
 
         if ($role === 'ENSEIGNANT') {
             $annee = $anneeId ?? $this->enseignementRepository->anneeCourante();
-            if ($annee === null || !$this->enseignementRepository->enseignantAffecteAuCours((int) $utilisateurId, $coursId, $annee)) {
+            if ($annee === null || ! $this->enseignementRepository->enseignantAffecteAuCours((int) $utilisateurId, $coursId, $annee)) {
                 throw new AccesRefuseException('Vous n\'êtes pas affecté à ce cours pour cette année.');
             }
 
@@ -54,6 +58,11 @@ final class ListerInscritsDuCours
                 $result[] = [
                     'id' => $inscription->id,
                     'etudiant_id' => $inscription->etudiantId,
+                    'etudiant' => [
+                        'matricule' => $inscription->etudiantMatricule,
+                        'nom' => $inscription->etudiantNom,
+                        'prenom' => $inscription->etudiantPrenom,
+                    ],
                     'cours_id' => $inscription->coursId,
                     'annee_id' => $inscription->anneeId,
                     'date_inscription' => $inscription->dateInscription,

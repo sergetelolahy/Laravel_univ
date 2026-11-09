@@ -11,8 +11,6 @@ use App\Infrastructure\Persistence\Eloquent\Models\Enseignant;
 use App\Infrastructure\Persistence\Eloquent\Models\Etudiant;
 use App\Infrastructure\Persistence\Eloquent\Models\Filiere;
 use App\Infrastructure\Persistence\Eloquent\Models\Groupe;
-use App\Infrastructure\Persistence\Eloquent\Models\InscriptionCours;
-use App\Infrastructure\Persistence\Eloquent\Models\Salle;
 use App\Infrastructure\Persistence\Eloquent\Models\Semestre;
 use App\Infrastructure\Persistence\Eloquent\Models\Utilisateur;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -25,26 +23,45 @@ class ScolariteTest extends TestCase
     use RefreshDatabase;
 
     protected Utilisateur $admin;
+
     protected Utilisateur $scolarite;
+
     protected Utilisateur $etudiantUserA;
+
     protected Etudiant $etudiantA;
+
     protected Utilisateur $etudiantUserB;
+
     protected Etudiant $etudiantB;
+
     protected Utilisateur $etudiantUserAutreFiliere;
+
     protected Etudiant $etudiantAutreFiliere;
+
     protected Utilisateur $enseignantUserAffecte;
+
     protected Enseignant $enseignantAffecte;
+
     protected Utilisateur $enseignantUserNonAffecte;
+
     protected Enseignant $enseignantNonAffecte;
 
     protected Filiere $filiereIG;
+
     protected Filiere $filiereGL;
+
     protected AnneeUniversitaire $anneeCourante;
+
     protected AnneeUniversitaire $anneeAutre;
+
     protected Semestre $semestre1;
+
     protected Semestre $semestreAutreFiliere;
+
     protected Cours $cours1;
+
     protected Cours $cours2;
+
     protected Cours $coursAutreFiliere;
 
     protected function setUp(): void
@@ -239,6 +256,25 @@ class ScolariteTest extends TestCase
         }
     }
 
+    public function test_admin_peut_lister_les_inscriptions(): void
+    {
+        Sanctum::actingAs($this->admin);
+
+        $this->postJson('/api/inscriptions', [
+            'etudiant_id' => $this->etudiantA->id,
+            'cours_id' => $this->cours1->id,
+            'annee_id' => $this->anneeCourante->id,
+        ])
+            ->assertCreated()
+            ->assertJsonPath('data.etudiant_id', $this->etudiantA->id)
+            ->assertJsonPath('data.cours_id', $this->cours1->id);
+
+        $this->getJson('/api/inscriptions')
+            ->assertOk()
+            ->assertJsonPath('data.0.etudiant_id', $this->etudiantA->id)
+            ->assertJsonPath('data.0.cours_id', $this->cours1->id);
+    }
+
     /**
      * 2. Étudiant qui s'inscrit lui-même pour l'année courante (201) ;
      *    qui tente d'inscrire un autre étudiant (seule sa propre inscription est créée) ;
@@ -266,8 +302,8 @@ class ScolariteTest extends TestCase
             // Ou pour un nouveau cours où A n'est pas inscrit mais donne l'id de B :
             // Créons un cours temporaire pour ce test afin d'isoler
             $coursTmp = Cours::query()->create([
-                'code' => 'TMP' . $exec,
-                'intitule' => 'Cours Temporaire ' . $exec,
+                'code' => 'TMP'.$exec,
+                'intitule' => 'Cours Temporaire '.$exec,
                 'semestre_id' => $this->semestre1->id,
                 'coefficient' => 1.0,
                 'credits' => 2,
@@ -320,14 +356,14 @@ class ScolariteTest extends TestCase
             Sanctum::actingAs($this->scolarite);
 
             $coursTmp1 = Cours::query()->create([
-                'code' => 'LOT1_' . $exec,
+                'code' => 'LOT1_'.$exec,
                 'intitule' => 'Lot 1',
                 'semestre_id' => $this->semestre1->id,
                 'coefficient' => 1.0,
                 'credits' => 2,
             ]);
             $coursTmp2 = Cours::query()->create([
-                'code' => 'LOT2_' . $exec,
+                'code' => 'LOT2_'.$exec,
                 'intitule' => 'Lot 2',
                 'semestre_id' => $this->semestre1->id,
                 'coefficient' => 1.0,
@@ -384,20 +420,24 @@ class ScolariteTest extends TestCase
         for ($exec = 1; $exec <= 2; $exec++) {
             // Enseignant affecté au cours (200)
             Sanctum::actingAs($this->enseignantUserAffecte);
-            $respAffecte = $this->getJson('/api/cours/' . $this->cours1->id . '/inscrits');
+            $respAffecte = $this->getJson('/api/cours/'.$this->cours1->id.'/inscrits');
             $respAffecte->assertStatus(200)
-                ->assertJsonPath('message', 'Liste des inscrits récupérée avec succès.');
+                ->assertJsonPath('message', 'Liste des inscrits récupérée avec succès.')
+                ->assertJsonPath('data.0.etudiant.matricule', 'ET0001')
+                ->assertJsonPath('data.0.etudiant.nom', 'Rakoto')
+                ->assertJsonPath('data.0.etudiant.prenom', 'Jean');
 
             // Enseignant non affecté (403)
             Sanctum::actingAs($this->enseignantUserNonAffecte);
-            $respNonAffecte = $this->getJson('/api/cours/' . $this->cours1->id . '/inscrits');
+            $respNonAffecte = $this->getJson('/api/cours/'.$this->cours1->id.'/inscrits');
             $respNonAffecte->assertStatus(403);
 
             // Scolarité (200)
             Sanctum::actingAs($this->scolarite);
-            $respSco = $this->getJson('/api/cours/' . $this->cours1->id . '/inscrits');
+            $respSco = $this->getJson('/api/cours/'.$this->cours1->id.'/inscrits');
             $respSco->assertStatus(200)
-                ->assertJsonPath('message', 'Liste des inscrits récupérée avec succès.');
+                ->assertJsonPath('message', 'Liste des inscrits récupérée avec succès.')
+                ->assertJsonPath('data.0.etudiant.matricule', 'ET0001');
         }
     }
 
@@ -415,47 +455,47 @@ class ScolariteTest extends TestCase
             Sanctum::actingAs($this->scolarite);
 
             $groupePlein = Groupe::query()->create([
-                'nom' => 'G_LIM_' . $exec,
+                'nom' => 'G_LIM_'.$exec,
                 'filiere_id' => $this->filiereIG->id,
                 'annee_id' => $this->anneeCourante->id,
                 'effectif_max' => 1,
             ]);
 
             $groupeAutre = Groupe::query()->create([
-                'nom' => 'G_SEC_' . $exec,
+                'nom' => 'G_SEC_'.$exec,
                 'filiere_id' => $this->filiereIG->id,
                 'annee_id' => $this->anneeCourante->id,
                 'effectif_max' => 5,
             ]);
 
             // Ajout d'étudiant valide (200)
-            $respAjout = $this->postJson('/api/groupes/' . $groupePlein->id . '/etudiants', [
+            $respAjout = $this->postJson('/api/groupes/'.$groupePlein->id.'/etudiants', [
                 'etudiant_ids' => [$this->etudiantA->id],
             ]);
             $respAjout->assertStatus(200)
                 ->assertJsonPath('message', 'Étudiants ajoutés au groupe avec succès.');
 
             // Dépassement d'effectif_max (422) : le groupePlein a une capacité de 1 et est déjà plein
-            $respDepassement = $this->postJson('/api/groupes/' . $groupePlein->id . '/etudiants', [
+            $respDepassement = $this->postJson('/api/groupes/'.$groupePlein->id.'/etudiants', [
                 'etudiant_ids' => [$this->etudiantB->id],
             ]);
             $respDepassement->assertStatus(422);
 
             // Étudiant déjà dans un autre groupe de la même année (409)
             // L'étudiant A est déjà dans groupePlein, on tente de l'ajouter dans groupeAutre
-            $respDejaGroupe = $this->postJson('/api/groupes/' . $groupeAutre->id . '/etudiants', [
+            $respDejaGroupe = $this->postJson('/api/groupes/'.$groupeAutre->id.'/etudiants', [
                 'etudiant_ids' => [$this->etudiantA->id],
             ]);
             $respDejaGroupe->assertStatus(409);
 
             // Étudiant d'une autre filière (422)
-            $respAutreFiliere = $this->postJson('/api/groupes/' . $groupeAutre->id . '/etudiants', [
+            $respAutreFiliere = $this->postJson('/api/groupes/'.$groupeAutre->id.'/etudiants', [
                 'etudiant_ids' => [$this->etudiantAutreFiliere->id],
             ]);
             $respAutreFiliere->assertStatus(422);
 
             // Suppression d'un groupe non vide (409)
-            $respSupprNonVide = $this->deleteJson('/api/groupes/' . $groupePlein->id);
+            $respSupprNonVide = $this->deleteJson('/api/groupes/'.$groupePlein->id);
             $respSupprNonVide->assertStatus(409);
 
             // Nettoyage pour permettre la 2ème itération
@@ -473,6 +513,13 @@ class ScolariteTest extends TestCase
      */
     public function test_etudiants_routes_et_permissions(): void
     {
+        DB::table('inscription_cours')->insert([
+            'etudiant_id' => $this->etudiantA->id,
+            'cours_id' => $this->cours1->id,
+            'annee_id' => $this->anneeCourante->id,
+            'date_inscription' => now()->format('Y-m-d H:i:s'),
+        ]);
+
         for ($exec = 1; $exec <= 2; $exec++) {
             // /etudiants/me : sans jeton (401)
             app('auth')->forgetGuards();
@@ -490,25 +537,36 @@ class ScolariteTest extends TestCase
             $respEtudiant->assertStatus(200)
                 ->assertJsonPath('data.matricule', 'ET0001');
 
+            $this->getJson('/api/etudiants/me/inscriptions')
+                ->assertOk()
+                ->assertJsonPath('data.0.cours.code', 'IG101')
+                ->assertJsonPath('data.0.cours.intitule', 'Algorithmique');
+
             // GET /etudiants : étudiant (403)
             $respListEtudiant = $this->getJson('/api/etudiants');
             $respListEtudiant->assertStatus(403);
 
             // PUT /etudiants/{id} par admin (200)
             Sanctum::actingAs($this->admin);
-            $respPutAdmin = $this->putJson('/api/etudiants/' . $this->etudiantA->id, [
-                'nom' => 'RakotoModifieAdmin' . $exec,
+            $respPutAdmin = $this->putJson('/api/etudiants/'.$this->etudiantA->id, [
+                'nom' => 'RakotoModifieAdmin'.$exec,
             ]);
             $respPutAdmin->assertStatus(200)
-                ->assertJsonPath('data.nom', 'RakotoModifieAdmin' . $exec);
+                ->assertJsonPath('data.nom', 'RakotoModifieAdmin'.$exec);
+
+            $respFiliereVide = $this->putJson('/api/etudiants/'.$this->etudiantA->id, [
+                'filiere_id' => null,
+            ]);
+            $respFiliereVide->assertStatus(422)
+                ->assertJsonValidationErrors(['filiere_id']);
 
             // PUT /etudiants/{id} par scolarité (200)
             Sanctum::actingAs($this->scolarite);
-            $respPutSco = $this->putJson('/api/etudiants/' . $this->etudiantA->id, [
-                'nom' => 'RakotoModifieSco' . $exec,
+            $respPutSco = $this->putJson('/api/etudiants/'.$this->etudiantA->id, [
+                'nom' => 'RakotoModifieSco'.$exec,
             ]);
             $respPutSco->assertStatus(200)
-                ->assertJsonPath('data.nom', 'RakotoModifieSco' . $exec);
+                ->assertJsonPath('data.nom', 'RakotoModifieSco'.$exec);
         }
     }
 }

@@ -31,6 +31,7 @@ import MesMoyennesPage from './pages/etudiant/MesMoyennesPage';
 import EmploiDuTempsPage from './pages/EmploiDuTempsPage';
 import MesInscriptionsPage from './pages/etudiant/MesInscriptionsPage';
 import MonProfilPage from './pages/etudiant/MonProfilPage';
+import PlanningHebdomadairePage from './pages/PlanningHebdomadairePage';
 
 const ALL_ROLES = [ADMIN, SCOLARITE, ENSEIGNANT, ETUDIANT];
 
@@ -63,6 +64,7 @@ export default function AppRoutes() {
             </Route>
 
             <Route element={<ProtectedLayout roles={[ADMIN, SCOLARITE, ENSEIGNANT]} />}>
+                <Route path="/edt-hebdomadaire" element={<PlanningHebdomadairePage />} />
                 <Route path="/salles" element={<SallesPage />} />
                 <Route path="/etudiants" element={<EtudiantsListPage />} />
                 <Route path="/etudiants/:id" element={<EtudiantDetailPage />} />

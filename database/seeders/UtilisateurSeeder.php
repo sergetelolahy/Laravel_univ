@@ -13,8 +13,8 @@ class UtilisateurSeeder extends Seeder
     public function run(): void
     {
         $filiere = Filiere::query()->firstOrCreate(
-            ['code' => 'M1-IG'],
-            ['nom' => 'Master 1 - Ingénierie de Gestion'],
+            ['code' => 'L1-ISLI'],
+            ['nom' => 'L1 Informatique - ISLI'],
         );
 
         $comptes = [
@@ -53,15 +53,17 @@ class UtilisateurSeeder extends Seeder
         ];
 
         foreach ($comptes as $compte) {
-            $utilisateur = Utilisateur::query()->create([
-                'email' => $compte['email'],
-                'mot_de_passe_hash' => Hash::make('Password123!'),
-                'role' => $compte['role'],
-                'actif' => $compte['actif'],
-            ]);
+            $utilisateur = Utilisateur::query()->firstOrCreate(
+                ['email' => $compte['email']],
+                [
+                    'mot_de_passe_hash' => Hash::make('Password123!'),
+                    'role' => $compte['role'],
+                    'actif' => $compte['actif'],
+                ]
+            );
 
             if (($compte['role'] ?? null) === Role::ENSEIGNANT->value) {
-                $utilisateur->enseignant()->create([
+                $utilisateur->enseignant()->updateOrCreate([], [
                     'nom' => $compte['profil']['nom'],
                     'prenom' => $compte['profil']['prenom'],
                     'specialite' => $compte['profil']['specialite'],
@@ -69,7 +71,7 @@ class UtilisateurSeeder extends Seeder
             }
 
             if (($compte['role'] ?? null) === Role::ETUDIANT->value) {
-                $utilisateur->etudiant()->create([
+                $utilisateur->etudiant()->updateOrCreate([], [
                     'matricule' => $compte['profil']['matricule'],
                     'nom' => $compte['profil']['nom'],
                     'prenom' => $compte['profil']['prenom'],

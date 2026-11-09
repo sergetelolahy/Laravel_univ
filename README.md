@@ -7,6 +7,23 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## Données de démonstration ENI
+
+`php artisan db:seed` prépare les parcours, les cours, les étudiants et les données pédagogiques de démonstration. Les intitulés `[DEMO]`, les évaluations `DEMO_CC`, les emplois du temps et les notes sont fictifs et ne représentent pas les maquettes ni les calendriers officiels de l’ENI.
+
+## Structure des inscriptions pédagogiques
+
+Chaque étudiant doit être rattaché à une filière. Chaque cours appartient à un semestre, et chaque semestre à une filière ; les inscriptions d’un étudiant sont donc limitées aux cours de sa filière et présentées par semestre. Affectez la filière à l’étudiant avant de créer ses inscriptions.
+
+## Circuit de planification hebdomadaire
+
+1. Chaque enseignant renseigne ses disponibilités pour une semaine, depuis **Mes disponibilités**.
+2. La scolarité consulte les disponibilités reçues dans la carte dédiée à la semaine choisie, même avant d’ouvrir un emploi du temps, puis place les cours dans les créneaux déclarés et choisit les groupes et les salles.
+3. La scolarité soumet la proposition à validation, puis un compte Scolarité valide le planning.
+4. L’administrateur publie l’EDT validé. Les séances ne sont ajoutées à l’emploi du temps des étudiants et des enseignants qu’à cette étape.
+
+Les semaines commencent le lundi. Les conflits d’enseignant, de groupe et de salle, les affectations de cours et la capacité des salles sont contrôlés avant l’ajout et au moment de la publication.
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:

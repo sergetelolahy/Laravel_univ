@@ -186,6 +186,22 @@ class ReferentielTest extends TestCase
         $this->deleteJson('/api/salles/' . $salleId)->assertStatus(204);
     }
 
+    public function test_liste_filieres_exclut_les_anciennes_filieres_archivees(): void
+    {
+        Filiere::query()->create([
+            'code' => 'OLD-TRACK',
+            'nom' => 'Archive - Ancienne filière',
+            'actif' => false,
+        ]);
+
+        Sanctum::actingAs($this->admin);
+
+        $this->getJson('/api/filieres')
+            ->assertOk()
+            ->assertJsonFragment(['code' => $this->filiere->code])
+            ->assertJsonMissing(['code' => 'OLD-TRACK']);
+    }
+
     public function test_liste_des_semestres_est_eager_loaded_et_stable_en_nombre_de_requetes(): void
     {
         Sanctum::actingAs($this->admin);

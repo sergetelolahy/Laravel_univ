@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\NoteController;
 use App\Http\Controllers\Api\AbsenceController;
 use App\Http\Controllers\Api\EtudiantConsultationController;
 use App\Http\Controllers\Api\ValidationSemestreController;
+use App\Http\Controllers\Api\PlanningHebdomadaireController;
 
 
 Route::controller(AuthController::class)->prefix('auth')->group(function (): void {
@@ -114,9 +115,24 @@ Route::middleware(['auth:sanctum'])->group(function (): void {
     Route::controller(SeanceController::class)->prefix('seances')->group(function (): void {
         Route::get('/', 'index')->middleware('role:ADMIN,SCOLARITE');
         Route::get('/{id}', 'show')->whereNumber('id')->middleware('role:ADMIN,SCOLARITE');
-        Route::post('/', 'store')->middleware('role:ADMIN');
         Route::put('/{id}', 'update')->whereNumber('id')->middleware('role:ADMIN');
         Route::delete('/{id}', 'destroy')->whereNumber('id')->middleware('role:ADMIN');
+    });
+
+    Route::prefix('edt')->controller(PlanningHebdomadaireController::class)->group(function (): void {
+        Route::get('/disponibilites', 'disponibilites')->middleware('role:ADMIN,SCOLARITE,ENSEIGNANT');
+        Route::post('/disponibilites', 'enregistrerDisponibilites')->middleware('role:ENSEIGNANT');
+        Route::get('/hebdomadaires', 'index')->middleware('role:ADMIN,SCOLARITE');
+        Route::post('/hebdomadaires', 'creer')->middleware('role:SCOLARITE');
+        Route::get('/hebdomadaires/{id}', 'show')->whereNumber('id')->middleware('role:ADMIN,SCOLARITE');
+        Route::post('/hebdomadaires/{id}/seances', 'ajouterSeance')->whereNumber('id')->middleware('role:SCOLARITE');
+        Route::delete('/hebdomadaires/{id}/seances/{seanceId}', 'supprimerSeance')
+            ->whereNumber('id')
+            ->whereNumber('seanceId')
+            ->middleware('role:SCOLARITE');
+        Route::post('/hebdomadaires/{id}/soumettre', 'soumettre')->whereNumber('id')->middleware('role:SCOLARITE');
+        Route::post('/hebdomadaires/{id}/valider', 'valider')->whereNumber('id')->middleware('role:SCOLARITE');
+        Route::post('/hebdomadaires/{id}/publier', 'publier')->whereNumber('id')->middleware('role:ADMIN');
     });
 
     Route::controller(SalleController::class)->prefix('salles')->group(function (): void {
@@ -201,7 +217,5 @@ Route::middleware(['auth:sanctum'])->group(function (): void {
             [EtudiantConsultationController::class, 'emploiDuTemps']
         )->middleware('role:ETUDIANT');
 });
-
-
 
 

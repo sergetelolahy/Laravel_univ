@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { useSeances, useCreateSeance, useUpdateSeance, useRemoveSeance } from '../features/seances';
+import { useSeances, useUpdateSeance, useRemoveSeance } from '../features/seances';
 import { useCoursList } from '../features/cours';
 import { useGroupes } from '../features/groupes';
 import { useSalles } from '../features/salles';
@@ -27,7 +28,6 @@ export default function SeancesPage() {
     const { data: sallesData } = useSalles();
     const { data: enseignantsData } = useEnseignants({ per_page: 100 });
 
-    const createMutation = useCreateSeance();
     const updateMutation = useUpdateSeance();
     const removeMutation = useRemoveSeance();
 
@@ -44,14 +44,6 @@ export default function SeancesPage() {
     const groupesListe = groupesData?.data ?? [];
     const sallesListe = sallesData?.data ?? [];
     const enseignantsListe = enseignantsData?.data ?? [];
-
-    function openCreate() {
-        setEditing(null);
-        setForm(EMPTY_FORM);
-        setFormError('');
-        setFieldErrors({});
-        setModalOpen(true);
-    }
 
     function openEdit(seance) {
         setEditing(seance);
@@ -81,11 +73,7 @@ export default function SeancesPage() {
             fin: toApiDateTime(form.fin),
         };
         try {
-            if (editing) {
-                await updateMutation.mutateAsync({ id: editing.id, payload });
-            } else {
-                await createMutation.mutateAsync(payload);
-            }
+            await updateMutation.mutateAsync({ id: editing.id, payload });
             setModalOpen(false);
         } catch (err) {
             setFormError(extractErrorMessage(err, "Impossible d'enregistrer la séance."));
@@ -103,14 +91,20 @@ export default function SeancesPage() {
         }
     }
 
-    const saving = createMutation.isPending || updateMutation.isPending;
+    const saving = updateMutation.isPending;
 
     return (
         <div>
             <PageHeader
                 title="Emplois du temps"
                 description="Planification des séances (cours, groupe, enseignant, salle)."
-                actions={isAdmin && <Button onClick={openCreate}>Nouvelle séance</Button>}
+                actions={
+                    isAdmin && (
+                        <Link to="/edt-hebdomadaire" className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-3.5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500">
+                            Préparer un EDT hebdomadaire
+                        </Link>
+                    )
+                }
             />
 
             <Card>
@@ -161,7 +155,7 @@ export default function SeancesPage() {
             <Modal
                 open={modalOpen}
                 onClose={() => setModalOpen(false)}
-                title={editing ? 'Modifier la séance' : 'Nouvelle séance'}
+                title="Modifier la séance publiée"
                 size="lg"
                 footer={
                     <>

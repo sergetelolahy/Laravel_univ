@@ -19,7 +19,7 @@ final class UpdateEtudiantRequest extends FormRequest
             'nom' => ['sometimes', 'string', 'max:255'],
             'prenom' => ['sometimes', 'string', 'max:255'],
             'matricule' => ['sometimes', 'string', 'max:50'],
-            'filiere_id' => ['sometimes', 'nullable', 'integer', 'exists:filiere,id'],
+            'filiere_id' => ['sometimes', 'required', 'integer', 'exists:filiere,id'],
         ];
     }
 

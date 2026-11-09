@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Application\Scolarite\Inscriptions;
 
-use App\Domain\Referentiel\Exceptions\ConflitException;
 use App\Domain\Referentiel\Exceptions\DonneesInvalidesException;
 use App\Domain\Referentiel\Exceptions\RessourceIntrouvableException;
 use App\Domain\Scolarite\Exceptions\AccesRefuseException;
@@ -21,8 +20,7 @@ final class InscrireAUnCours
         private readonly EtudiantRepository $etudiantRepository,
         private readonly InscriptionRepository $inscriptionRepository,
         private readonly EnseignementRepository $enseignementRepository,
-    ) {
-    }
+    ) {}
 
     /**
      * @param array{
@@ -32,7 +30,6 @@ final class InscrireAUnCours
      *     utilisateur_id?:int,
      *     role?:string
      * } $donnees
-     *
      * @return array<string, mixed>
      */
     public function execute(array $donnees): array
@@ -92,9 +89,9 @@ final class InscrireAUnCours
                 $anneeCourante === null
                 || $anneeId !== $anneeCourante
             ) {
-                throw new AnneeNonCouranteException();
+                throw new AnneeNonCouranteException;
             }
-        } elseif (!$estScolarite) {
+        } elseif (! $estScolarite) {
             throw new AccesRefuseException(
                 'Vous ne pouvez pas inscrire cet étudiant pour ce cours.'
             );
@@ -108,20 +105,20 @@ final class InscrireAUnCours
                 $anneeId
             )
         ) {
-            throw new InscriptionDejaExistanteException();
+            throw new InscriptionDejaExistanteException;
         }
 
         // 5. Vérifier la compatibilité de la filière.
-        $filiereEtudiant = $etudiant->filiereId ?? 0;
+        $filiereEtudiant = $etudiant->filiereId;
 
         $filiereCours = $this->enseignementRepository
             ->filierePourCours($coursId);
 
         if (
-            $filiereEtudiant > 0
-            && $filiereCours !== $filiereEtudiant
+            $filiereEtudiant === null
+            || $filiereCours !== $filiereEtudiant
         ) {
-            throw new FiliereIncompatibleException();
+            throw new FiliereIncompatibleException;
         }
 
         // 6. Créer l’inscription.

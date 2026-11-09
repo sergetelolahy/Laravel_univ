@@ -20,11 +20,10 @@ final class InscrireEnLot
         private readonly EtudiantRepository $etudiantRepository,
         private readonly InscriptionRepository $inscriptionRepository,
         private readonly EnseignementRepository $enseignementRepository,
-    ) {
-    }
+    ) {}
 
     /**
-     * @param array{inscriptions: array<int, array{etudiant_id:int, cours_id:int, annee_id:int}>, utilisateur_id?:int, role?:string} $donnees
+     * @param  array{inscriptions: array<int, array{etudiant_id:int, cours_id:int, annee_id:int}>, utilisateur_id?:int, role?:string}  $donnees
      */
     public function execute(array $donnees): array
     {
@@ -52,7 +51,7 @@ final class InscrireEnLot
 
             $cle = "{$etudiantId}_{$coursId}_{$anneeId}";
             if (isset($vus[$cle]) || $this->inscriptionRepository->existe($etudiantId, $coursId, $anneeId)) {
-                throw new InscriptionDejaExistanteException();
+                throw new InscriptionDejaExistanteException;
             }
             $vus[$cle] = true;
 
@@ -64,16 +63,16 @@ final class InscrireEnLot
             $estMonCompte = $utilisateurId > 0 && $etudiant->utilisateurId === $utilisateurId;
             if ($estMonCompte) {
                 if ($anneeCourante === null || $anneeId !== $anneeCourante) {
-                    throw new AnneeNonCouranteException();
+                    throw new AnneeNonCouranteException;
                 }
-            } elseif (!$estScolarite) {
+            } elseif (! $estScolarite) {
                 throw new AccesRefuseException('Vous ne pouvez pas inscrire ce lot d\'étudiants.');
             }
 
-            $filiereEtudiant = $etudiant->filiereId ?? 0;
+            $filiereEtudiant = $etudiant->filiereId;
             $filiereCours = $this->enseignementRepository->filierePourCours($coursId);
-            if ($filiereEtudiant > 0 && $filiereCours !== $filiereEtudiant) {
-                throw new FiliereIncompatibleException();
+            if ($filiereEtudiant === null || $filiereCours !== $filiereEtudiant) {
+                throw new FiliereIncompatibleException;
             }
 
             $liste[] = [

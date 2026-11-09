@@ -1,15 +1,18 @@
 import { useState } from 'react';
 import { useSemestres } from '../features/semestres';
+import { useEtudiants } from '../features/etudiants';
 import { useAnnees, useAnneeCourante } from '../features/annees';
 import { useValiderSemestre } from '../features/validationSemestre';
 import { extractErrorMessage } from '../lib/api';
-import { Alert, Badge, Button, Card, Field, Input, PageHeader, Select } from '../components/ui';
+import { Alert, Badge, Button, Card, Field, PageHeader, Select } from '../components/ui';
 
 export default function ValidationSemestrePage() {
     const { data: semestresData } = useSemestres();
+    const { data: etudiantsData, isLoading: etudiantsLoading, error: etudiantsError } = useEtudiants({ per_page: 100 });
     const { data: anneesData } = useAnnees();
     const { data: anneeCouranteData } = useAnneeCourante();
     const semestres = semestresData?.data ?? [];
+    const etudiants = etudiantsData?.data ?? [];
     const annees = anneesData?.data ?? [];
 
     const [semestreId, setSemestreId] = useState('');
@@ -19,6 +22,16 @@ export default function ValidationSemestrePage() {
     const [resultat, setResultat] = useState(null);
 
     const mutation = useValiderSemestre(semestreId);
+    const semestreSelectionne = semestres.find((semestre) => String(semestre.id) === semestreId);
+    const etudiantsDuProgramme = semestreSelectionne?.filiere?.id
+        ? etudiants.filter((etudiant) => etudiant.filiere_id === semestreSelectionne.filiere.id)
+        : etudiants;
+
+    function choisirSemestre(value) {
+        setSemestreId(value);
+        setEtudiantId('');
+        setResultat(null);
+    }
 
     async function handleSubmit(event) {
         event.preventDefault();
@@ -43,7 +56,7 @@ export default function ValidationSemestrePage() {
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <Alert variant="error">{error}</Alert>
                     <Field label="Semestre" required>
-                        <Select value={semestreId} onChange={(e) => setSemestreId(e.target.value)} required>
+                        <Select value={semestreId} onChange={(e) => choisirSemestre(e.target.value)} required>
                             <option value="" disabled>
                                 Sélectionner…
                             </option>
@@ -54,8 +67,22 @@ export default function ValidationSemestrePage() {
                             ))}
                         </Select>
                     </Field>
-                    <Field label="ID de l'étudiant" required hint="Identifiant de la fiche étudiant">
-                        <Input type="number" min="1" value={etudiantId} onChange={(e) => setEtudiantId(e.target.value)} required />
+                    <Field label="Matricule de l'étudiant" required error={etudiantsError ? extractErrorMessage(etudiantsError, 'Impossible de charger les étudiants.') : undefined}>
+                        <Select
+                            value={etudiantId}
+                            onChange={(e) => setEtudiantId(e.target.value)}
+                            disabled={etudiantsLoading || !semestreId}
+                            required
+                        >
+                            <option value="" disabled>
+                                {etudiantsLoading ? 'Chargement des étudiants…' : 'Sélectionner un matricule…'}
+                            </option>
+                            {etudiantsDuProgramme.map((etudiant) => (
+                                <option key={etudiant.id} value={etudiant.id}>
+                                    {etudiant.matricule} — {etudiant.nom} {etudiant.prenom}
+                                </option>
+                            ))}
+                        </Select>
                     </Field>
                     <Field label="Année universitaire" required>
                         <Select value={anneeId} onChange={(e) => setAnneeId(e.target.value)} required>

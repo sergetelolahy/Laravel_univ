@@ -15,7 +15,7 @@ final class EloquentFiliereRepository implements FiliereRepositoryInterface
 {
     public function lister(array $filtres, int $page, int $parPage): array
     {
-        $query = EloquentFiliere::query();
+        $query = EloquentFiliere::query()->where('actif', true);
 
         if (isset($filtres['code'])) {
             $query->where('code', 'like', '%' . (string) $filtres['code'] . '%');

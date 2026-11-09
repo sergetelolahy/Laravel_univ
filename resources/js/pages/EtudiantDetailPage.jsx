@@ -28,7 +28,7 @@ export default function EtudiantDetailPage() {
                 nom: etudiant.nom,
                 prenom: etudiant.prenom,
                 matricule: etudiant.matricule,
-                filiere_id: etudiant.filiere_id ? String(etudiant.filiere_id) : '',
+                filiere_id: String(etudiant.filiere_id),
             });
         }
     }, [etudiant]);
@@ -41,7 +41,7 @@ export default function EtudiantDetailPage() {
         try {
             await updateMutation.mutateAsync({
                 id,
-                payload: { ...form, filiere_id: form.filiere_id ? Number(form.filiere_id) : null },
+                payload: { ...form, filiere_id: Number(form.filiere_id) },
             });
             setSuccess(true);
         } catch (err) {
@@ -81,8 +81,7 @@ export default function EtudiantDetailPage() {
                         <Input value={form.matricule} disabled={!canEdit} onChange={(e) => setForm({ ...form, matricule: e.target.value })} />
                     </Field>
                     <Field label="Filière" error={fieldErrors.filiere_id?.[0]}>
-                        <Select value={form.filiere_id} disabled={!canEdit} onChange={(e) => setForm({ ...form, filiere_id: e.target.value })}>
-                            <option value="">Aucune</option>
+                        <Select value={form.filiere_id} disabled={!canEdit} required onChange={(e) => setForm({ ...form, filiere_id: e.target.value })}>
                             {filieres.map((f) => (
                                 <option key={f.id} value={f.id}>
                                     {f.code} — {f.nom}

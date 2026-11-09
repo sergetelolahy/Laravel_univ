@@ -7,16 +7,14 @@ namespace App\Http\Controllers\Api;
 use App\Application\Planning\ListerSeances\ListerSeances;
 use App\Application\Planning\ModifierSeance\ModifierSeance;
 use App\Application\Planning\ObtenirSeance\ObtenirSeance;
-use App\Application\Planning\PlanifierSeance\PlanifierSeance;
 use App\Application\Planning\SupprimerSeance\SupprimerSeance;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\FiltreSeancesRequest;
 use App\Http\Requests\SeanceRequest;
 use App\Http\Resources\SeanceResource;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Response;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 final class SeanceController extends Controller
 {
@@ -41,13 +39,6 @@ final class SeanceController extends Controller
     public function show(int $id, ObtenirSeance $cas): SeanceResource
     {
         return new SeanceResource($cas->execute($id));
-    }
-
-    public function store(SeanceRequest $request, PlanifierSeance $cas): JsonResponse
-    {
-        $seance = $cas->execute($request->donnees());
-
-        return (new SeanceResource($seance))->response()->setStatusCode(201);
     }
 
     public function update(int $id, SeanceRequest $request, ModifierSeance $cas): SeanceResource

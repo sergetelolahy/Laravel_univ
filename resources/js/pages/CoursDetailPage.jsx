@@ -156,7 +156,13 @@ export default function CoursDetailPage() {
                         rows={inscritsQuery.data?.data ?? []}
                         emptyTitle="Aucun étudiant inscrit pour cette période"
                         columns={[
-                            { key: 'etudiant_id', header: 'Étudiant (id)' },
+                            {
+                                key: 'matricule',
+                                header: 'Étudiant',
+                                render: (row) => row.etudiant
+                                    ? `${row.etudiant.matricule} — ${row.etudiant.nom} ${row.etudiant.prenom}`
+                                    : 'Matricule indisponible',
+                            },
                             { key: 'date_inscription', header: 'Date d\'inscription', render: (r) => formatDate(r.date_inscription) },
                         ]}
                     />

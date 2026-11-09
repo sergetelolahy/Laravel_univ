@@ -5,10 +5,17 @@ import { Alert, Badge, Card, DataTable, PageHeader, Spinner } from '../../compon
 
 export default function MesMoyennesPage() {
     const { data, isLoading, error } = useMesMoyennes();
+    const moyennesSemestres = data?.moyennes_semestres ?? [];
+    const moyennesCours = data?.moyennes_cours ?? [];
+    const nombreCoursValides = data?.statistiques?.nombre_cours_valides ?? moyennesCours.filter((cours) => cours.valide).length;
 
     return (
         <div>
-            <PageHeader title="Mes moyennes" description="Moyennes par cours et par semestre." />
+            <PageHeader
+                title="Mes moyennes"
+                description="Suis tes résultats par cours et par semestre."
+                actions={<Badge variant="green">{nombreCoursValides} cours validé{nombreCoursValides > 1 ? 's' : ''}</Badge>}
+            />
 
             {isLoading && <Spinner label="Chargement des moyennes…" />}
             {error && (
@@ -19,36 +26,52 @@ export default function MesMoyennesPage() {
 
             {data && (
                 <div className="space-y-6">
-                    <Card title="Par semestre">
+                    <Card title="Résultats par semestre">
                         <DataTable
-                            rows={data.moyennes_semestres ?? []}
+                            rows={moyennesSemestres}
                             rowKey="semestre_id"
                             emptyTitle="Aucune moyenne de semestre disponible"
                             columns={[
-                                { key: 'semestre', header: 'Semestre', render: (r) => `Semestre ${r.semestre}` },
-                                { key: 'moyenne', header: 'Moyenne', render: (r) => `${formatNumber(r.moyenne)} / 20` },
+                                { key: 'semestre', header: 'Semestre', render: (r) => <span className="font-semibold text-slate-800">Semestre {r.semestre}</span> },
+                                {
+                                    key: 'moyenne',
+                                    header: 'Moyenne',
+                                    render: (r) => (
+                                        <span className={`font-bold ${r.valide ? 'text-emerald-700' : 'text-rose-700'}`}>
+                                            {formatNumber(r.moyenne)} <span className="font-medium text-slate-400">/20</span>
+                                        </span>
+                                    ),
+                                },
                                 {
                                     key: 'valide',
                                     header: 'Statut',
-                                    render: (r) => (r.valide ? <Badge variant="green">Validé</Badge> : <Badge variant="red">Non validé</Badge>),
+                                    render: (r) => (r.valide ? <Badge variant="green">Validé</Badge> : <Badge variant="red">À améliorer</Badge>),
                                 },
                             ]}
                         />
                     </Card>
 
-                    <Card title="Par cours">
+                    <Card title="Résultats par cours">
                         <DataTable
-                            rows={data.moyennes_cours ?? []}
+                            rows={moyennesCours}
                             rowKey="cours_id"
                             emptyTitle="Aucune moyenne de cours disponible"
                             columns={[
                                 { key: 'code_cours', header: 'Code' },
                                 { key: 'cours', header: 'Cours' },
-                                { key: 'moyenne', header: 'Moyenne', render: (r) => `${formatNumber(r.moyenne)} / 20` },
+                                {
+                                    key: 'moyenne',
+                                    header: 'Moyenne',
+                                    render: (r) => (
+                                        <span className={`font-bold ${r.valide ? 'text-emerald-700' : 'text-rose-700'}`}>
+                                            {formatNumber(r.moyenne)} <span className="font-medium text-slate-400">/20</span>
+                                        </span>
+                                    ),
+                                },
                                 {
                                     key: 'valide',
                                     header: 'Statut',
-                                    render: (r) => (r.valide ? <Badge variant="green">Validé</Badge> : <Badge variant="red">Non validé</Badge>),
+                                    render: (r) => (r.valide ? <Badge variant="green">Validé</Badge> : <Badge variant="red">À améliorer</Badge>),
                                 },
                             ]}
                         />

@@ -73,8 +73,9 @@ export default function EvaluationsPage() {
             />
 
             <Card
+                title="Liste des évaluations"
                 actions={
-                    <Select value={coursFiltre} onChange={(e) => { setCoursFiltre(e.target.value); setPage(1); }} className="w-56">
+                    <Select value={coursFiltre} onChange={(e) => { setCoursFiltre(e.target.value); setPage(1); }} className="w-full sm:w-56">
                         <option value="">Tous les cours</option>
                         {coursListe.map((c) => (
                             <option key={c.id} value={c.id}>
@@ -85,58 +86,46 @@ export default function EvaluationsPage() {
                 }
             >
                 {formError && !modalOpen && <Alert variant="error" className="mb-4">{formError}</Alert>}
-                <table className="min-w-full divide-y divide-slate-200 text-sm">
-                    <thead>
-                        <tr className="text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                            <th className="px-3 py-2">Cours</th>
-                            <th className="px-3 py-2">Type</th>
-                            <th className="px-3 py-2">Pondération</th>
-                            <th className="px-3 py-2">Date</th>
-                            {isEnseignant && <th className="px-3 py-2 text-right">Actions</th>}
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                        {isLoading && (
-                            <tr>
-                                <td colSpan={5} className="px-3 py-6 text-center text-slate-500">
-                                    Chargement…
-                                </td>
-                            </tr>
-                        )}
-                        {error && (
-                            <tr>
-                                <td colSpan={5} className="px-3 py-6 text-center text-rose-600">
-                                    {extractErrorMessage(error)}
-                                </td>
-                            </tr>
-                        )}
-                        {!isLoading && rows.length === 0 && (
-                            <tr>
-                                <td colSpan={5} className="px-3 py-6 text-center text-slate-500">
-                                    Aucune évaluation trouvée.
-                                </td>
-                            </tr>
-                        )}
-                        {rows.map((evaluation) => {
-                            const cours = coursListe.find((c) => c.id === evaluation.cours_id);
-                            return (
-                                <tr key={evaluation.id} className="hover:bg-slate-50">
-                                    <td className="px-3 py-2.5">{cours?.code ?? `#${evaluation.cours_id}`}</td>
-                                    <td className="px-3 py-2.5">{evaluation.type}</td>
-                                    <td className="px-3 py-2.5">{formatNumber(evaluation.ponderation)}</td>
-                                    <td className="px-3 py-2.5">{formatDate(evaluation.date_eval)}</td>
-                                    {isEnseignant && (
-                                        <td className="px-3 py-2.5 text-right">
-                                            <Button variant="ghost" onClick={() => setNotesEvaluation(evaluation)}>
-                                                Saisir les notes
-                                            </Button>
-                                        </td>
-                                    )}
+                {isLoading && <p className="py-8 text-center text-sm text-slate-500">Chargement des évaluations…</p>}
+                {error && <Alert variant="error">{extractErrorMessage(error, 'Impossible de charger les évaluations.')}</Alert>}
+                {!isLoading && !error && rows.length === 0 && (
+                    <p className="py-8 text-center text-sm text-slate-500">Aucune évaluation trouvée.</p>
+                )}
+                {!isLoading && !error && rows.length > 0 && (
+                    <div className="-mx-5 overflow-x-auto px-5">
+                        <table className="min-w-[42rem] w-full divide-y divide-slate-100 text-sm">
+                            <thead>
+                                <tr className="text-left text-xs font-bold uppercase tracking-wide text-slate-400">
+                                    <th scope="col" className="px-3 py-3">Cours</th>
+                                    <th scope="col" className="px-3 py-3">Type</th>
+                                    <th scope="col" className="px-3 py-3">Pondération</th>
+                                    <th scope="col" className="px-3 py-3">Date</th>
+                                    {isEnseignant && <th scope="col" className="px-3 py-3 text-right">Actions</th>}
                                 </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                                {rows.map((evaluation) => {
+                                    const cours = coursListe.find((c) => c.id === evaluation.cours_id);
+                                    return (
+                                        <tr key={evaluation.id} className="transition hover:bg-slate-50">
+                                            <td className="px-3 py-3 font-semibold text-slate-800">{cours?.code ?? 'Cours indisponible'}</td>
+                                            <td className="px-3 py-3 text-slate-600">{evaluation.type}</td>
+                                            <td className="px-3 py-3 text-slate-600">{formatNumber(evaluation.ponderation)}</td>
+                                            <td className="px-3 py-3 text-slate-600">{formatDate(evaluation.date_eval)}</td>
+                                            {isEnseignant && (
+                                                <td className="px-3 py-3 text-right">
+                                                    <Button variant="ghost" onClick={() => setNotesEvaluation(evaluation)}>
+                                                        Saisir les notes
+                                                    </Button>
+                                                </td>
+                                            )}
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
 
                 {pagination && pagination.last_page > 1 && (
                     <div className="mt-4 flex items-center justify-between text-sm text-slate-600">
@@ -276,7 +265,10 @@ function SaisieNotesModal({ evaluation, onClose }) {
                 <div className="space-y-2">
                     {inscrits.map((i) => (
                         <div key={i.etudiant_id} className="flex items-center justify-between gap-3">
-                            <span className="text-sm text-slate-700">Étudiant #{i.etudiant_id}</span>
+                            <span className="text-sm text-slate-700">
+                                <span className="font-semibold">{i.etudiant?.matricule ?? 'Matricule indisponible'}</span>
+                                {i.etudiant?.nom && ` — ${i.etudiant.nom} ${i.etudiant.prenom ?? ''}`.trim()}
+                            </span>
                             <Input
                                 type="number"
                                 min="0"
